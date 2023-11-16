@@ -27,7 +27,8 @@
     "nodemailer": "^6.9.7",
     "nodemon": "^3.0.1",
     "socket.io": "^4.7.2",
-    "validator": "^13.9.0"
+    "validator": "^13.9.0",
+    "ws": "^8.14.2"
   },
   "homepage": "",
   "description": ""

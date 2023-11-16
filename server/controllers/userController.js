@@ -1,6 +1,9 @@
 const User = require("./../models/userModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const dotenv = require("dotenv")
+dotenv.config();
+const jwtSecret = process.env.JWT_SECRET; 
 exports.getAllUsers = async (req, res, next) => {
     try {
         const users = await User.find();
@@ -47,11 +50,14 @@ exports.createUser = async (req, res) => {
     try {
         const user = await User.create(req.body);
         console.log(user);
-        res.status(201).json({
-            status: "success",
-            data: {
-                user,
-            },
+        jwt.sign({userId:createdUser._id,username}, jwtSecret, {}, (err, token) => {
+            if (err) throw err;
+            res.cookie('token', token, {sameSite:'none', secure:true}).status(201).json({
+                status: "success",
+                data: {
+                    user,
+                },
+          });
         });
     } catch (err) {
         const isUser = await User.findOne({ email: req.body.email });
@@ -83,14 +89,15 @@ exports.updateUser = async (req, res) => {
                 message: "User not found",
             });
         }
-        const token = jwt.sign({ userId: user._id }, "654TalkWaveUser");
-        res.status(201).json({
-            status: "success",
-            data: {
-                user,
+        jwt.sign({userId:user._id,username}, jwtSecret, {}, (err, token) => {
+            res.cookie('token', token, {sameSite:'none', secure:true}).status(200).json({
+                message: "success",
                 token,
-            },
-        });
+                user,
+            });
+            
+          });
+        
     } catch (err) {
         res.status(400).json({
             message: "Failed to update user",
@@ -116,52 +123,29 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
-exports.getUsersByLocationID = async (req, res) => {
+exports.login = async (req, res, next) => {
+    const { username, password } = req.body;
     try {
-        const { locationID } = await User.find(req.query);
-        res.status(201).json({
-            status: "success",
-            data: {
+        const user = await User.findOne({ username });
+        if (!user) {
+            throw new Error("Invalid username or password");
+        }
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if (!isPasswordMatch) {
+            throw new Error("Invalid email or password");
+        }
+        jwt.sign({userId:user._id,username}, jwtSecret, {}, (err, token) => {
+            res.cookie('token', token, {sameSite:'none', secure:true}).status(200).json({
+                message: "success",
+                token,
                 user,
-            },
+            });
+            
         });
     } catch (err) {
-        res.status(400).json({
-            message: "failed",
-            err,
+        res.status(401).json({
+            message: "Login failed",
+            error: err.message,
         });
-    }
-};
-
-// filter by Email
-exports.getUserByEmail = async (req, res) => {
-    var email = req.query.email;
-    try {
-        var user = await User.findOne({ email: email });
-        if(!user){
-            res.status(201).json({ message: "not user" });
-        }else{
-            res.status(201).json(user);
-        }
-    } catch (err) {
-        res.status(422).json({ message: err.message });
-    }
-};
-
-// check old password
-exports.checkOldPassword = async (req, res) => {
-    var currentPassword = req.body.currentPassword;
-    var password = req.body.password;
-
-    try {
-        const isMatch = await bcrypt.compare(currentPassword, password);
-        if (isMatch) {
-            res.status(200).json({ match: true });
-        } else {
-            res.status(200).json({ match: false });
-        }
-    } catch (error) {
-        console.error("Error comparing passwords:", error);
-        res.status(500).json({ error: "Error comparing passwords" });
     }
 };

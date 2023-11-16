@@ -20,6 +20,20 @@
   font-weight: 500;
 }
 
+.chatting2{
+  color: #bc5143;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.bg-sender{
+  background-color: #fb8e25;
+}
+
+.bg-receiver{
+  background-color: #bc5143;
+}
+
 .btn-home{
   background-color: #fb8e25;
   padding: 10px;
@@ -34,4 +48,9 @@
   border: 1.5px solid #fb8e25;
   font-size: 1.2rem;
   border-radius: 30px;
+}
+
+.user-info span{
+  max-height: 22px;
+  overflow: hidden;
 }

@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import axiosInstance from "../axiosConfig/TalkWaveDB";
+import Swal from "sweetalert2";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -81,23 +83,57 @@ export default function Register() {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    localStorage.setItem("userInfo", JSON.stringify(user));
-
-    Swal.fire({
-      icon: "success",
-      title: "Account Created",
-      text: "You can Log in now",
-      showCancelButton: true,
-      confirmButtonText: "Log in",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        navigate("/login");
-      }
-    });
-
-    setUser({
+    // localStorage.setItem("userInfo", JSON.stringify(user));
+    let newUser = {
+      username: user.name,
+      email: user.email,
+      password: user.password,
+      confirmPassword: user.confirmPassword,
+    };
+    console.log(newUser);
+    axiosInstance
+      .get(`/users/email?email=${newUser.email}`)
+      .then((res) => {
+        console.log(res);
+        if (res.data) {
+          Swal.fire({
+            icon: "error",
+            title: "Email Not Valid",
+            text: "You can Log in, Email is already have an account...",
+            showCancelButton: true,
+            confirmButtonText: "Log in",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              navigate("/login");
+            }
+          });
+        } else {
+          axiosInstance.post(`/users`, newUser);
+          Swal.fire({
+            icon: "success",
+            title: "Account created",
+            text: "You can Log in Now...",
+            showCancelButton: true,
+            confirmButtonText: "Log in",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              navigate("/login");
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+      setUser({
+        name: "",
+        password: "",
+        confirmPassword: "",
+        email: "",
+      });
+    setErrors({
       nameError: "",
-      PasswordError: "",
+      passwordError: "",
       confirmPasswordError: "",
       emailError: "",
     });

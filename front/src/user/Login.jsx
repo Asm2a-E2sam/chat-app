@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import axiosInstance from "../axiosConfig/TalkWaveDB";
+import Swal from "sweetalert2";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -51,9 +53,21 @@ export default function Login() {
   
     const handleFormSubmit = async (e) => {
       e.preventDefault();
+      let loginUser ={ username: user.name, password: user.password };
+      // console.log(user);
+      await axiosInstance.post(`users/login`, loginUser)
+        .then((res) => {
+          setIsLogged(true)
+          loginUser = {...loginUser, email : res.data.user.email}
+          localStorage.setItem("userInfo", JSON.stringify(loginUser));
+          localStorage.setItem("token", JSON.stringify(res.data.token));
+          navigate('/chat')
+        })
+        .catch((err) => {
+          console.error(err);
+        });
   
-      localStorage.setItem("userInfo",JSON.stringify(user));
-  
+      
     //   Swal.fire({
     //     icon: "success",
     //     title: "Account Created",
@@ -67,9 +81,13 @@ export default function Login() {
     //   });
       
       setUser({
-        nameError: "",
-        PasswordError: ""
+        name: "",
+        password: ""
       });
+      setErrors({
+        nameError:"",
+        passwordError:""
+      })
     };
   
   const register=()=>{
