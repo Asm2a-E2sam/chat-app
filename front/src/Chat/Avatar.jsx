@@ -1,4 +1,4 @@
-export default function Avatar({ userId, username, online }) {
+export default function Avatar({ userId, username, online, size }) {
   const colors = [
     "bg-teal-100",
     "bg-green-100",
@@ -16,7 +16,7 @@ export default function Avatar({ userId, username, online }) {
   const color = colors[colorIndex];
   return (
     <div
-      className={"w-10 h-10 relative shadow-lg rounded-full flex items-center " + color}
+      className={`w-${size} h-${size} relative shadow-lg rounded-full flex items-center ${color}`}
     >
       <div className="text-center w-full opacity-70">
         {username[0].toUpperCase()}

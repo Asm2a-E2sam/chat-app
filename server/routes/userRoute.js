@@ -7,6 +7,7 @@ router
     .get(userController.getAllUsers)
     .post(userController.createUser);
 
+router.get("/email?:email",userController.getUserByEmail);
 
 router
     .route("/:id")

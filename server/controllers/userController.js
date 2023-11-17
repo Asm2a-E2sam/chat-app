@@ -50,14 +50,11 @@ exports.createUser = async (req, res) => {
     try {
         const user = await User.create(req.body);
         console.log(user);
-        jwt.sign({userId:createdUser._id,username}, jwtSecret, {}, (err, token) => {
-            if (err) throw err;
-            res.cookie('token', token, {sameSite:'none', secure:true}).status(201).json({
-                status: "success",
-                data: {
-                    user,
-                },
-          });
+        res.status(201).json({
+            status: "success",
+            data: {
+                user,
+            },
         });
     } catch (err) {
         const isUser = await User.findOne({ email: req.body.email });
@@ -68,6 +65,20 @@ exports.createUser = async (req, res) => {
             message: "failed",
             err,
         });
+    }
+};
+
+exports.getUserByEmail = async (req, res) => {
+    var email = req.query.email;
+    try {
+        var user = await User.findOne({ email: email });
+        if(!user){
+            res.status(201).json();
+        }else{
+            res.status(201).json(user);
+        }
+    } catch (err) {
+        res.status(422).json({ message: err.message });
     }
 };
 
@@ -134,6 +145,7 @@ exports.login = async (req, res, next) => {
         if (!isPasswordMatch) {
             throw new Error("Invalid email or password");
         }
+        
         jwt.sign({userId:user._id,username}, jwtSecret, {}, (err, token) => {
             res.cookie('token', token, {sameSite:'none', secure:true}).status(200).json({
                 message: "success",
