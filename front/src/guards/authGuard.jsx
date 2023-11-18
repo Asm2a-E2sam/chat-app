@@ -1,12 +1,13 @@
 import React from 'react'
 import { useContext } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
 import Swal from 'sweetalert2';
 import NotFound from '../NotFound/NotFound';
+import { UserContext } from '../context/LoginUser';
 
 export default function AuthGuard({ children }) {
-    const { isLogged } = useContext(AuthContext);
+    const { isLogged } = useContext(UserContext);
+    console.log(isLogged);
     const navigate = useNavigate();
     if (isLogged) {
         return children

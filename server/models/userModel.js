@@ -19,23 +19,10 @@ const userSchema = new mongoose.Schema(
             unique: true,
             lowercase: true,
         },
-        online: {
-            type: Boolean,
-            default:false
-        },
         password: {
             type: String,
             minLength: 6,
             required: [true, "password"],
-        },
-        confirmPassword: {
-            type: String,
-            validate: {
-                validator: function (el) {
-                    return el === this.password;
-                },
-                message: "Passwords Are Not The Same",
-            },
         }
     },
     {

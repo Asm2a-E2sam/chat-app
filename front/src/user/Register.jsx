@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import axiosInstance from "../axiosConfig/TalkWaveDB";
 import Swal from "sweetalert2";
+import { UserContext } from "../context/LoginUser";
 
 export default function Register() {
   const navigate = useNavigate();
   let [disable, setDisable] = useState(false);
-  const { isLogged, setIsLogged } = useContext(AuthContext);
+  // const { isLogged, setIsLogged } = useContext(UserContext);
   const [user, setUser] = useState({
     name: "",
     password: "",

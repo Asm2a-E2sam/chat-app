@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
 import axiosInstance from "../axiosConfig/TalkWaveDB";
 import Swal from "sweetalert2";
+import { UserContext } from "../context/LoginUser";
 
 export default function Login() {
+  const { name, setName, id, setId } = useContext(UserContext);
   const navigate = useNavigate();
   let [disable, setDisable] = useState(false);
-  const { isLogged, setIsLogged } = useContext(AuthContext);
   const [user, setUser] = useState({
     name: "",
     password: "",
@@ -53,28 +53,19 @@ export default function Login() {
     e.preventDefault();
     let loginUser = { username: user.name, password: user.password };
     console.log(loginUser);
-    await axiosInstance
-      .post(`users/login`, loginUser)
-      .then((res) => {
-        axiosInstance.patch(`/users/${res.data.user._id}`, { online: true });
-        setIsLogged(true);
-        loginUser = {
-          username: user.name,
-          email: res.data.user.email,
-          _id: res.data.user._id,
-        };
-        localStorage.setItem("userInfo", JSON.stringify(loginUser));
-        localStorage.setItem("token", JSON.stringify(res.data.token));
-        navigate("/chat");
-      })
-      .catch((err) => {
-        // console.error(err);
-        Swal.fire({
-          icon: "error",
-          title: "Unauthorized",
-          text: "Check your username and password"
-        });
+    const res = await axiosInstance.post(`/users/login`, loginUser);
+    if (res) {
+      console.log(res);
+      setId(res.data.user._id);
+      setName(res.data.user.username);
+      navigate("/chat");
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Unauthorized",
+        text: "Check your username and password",
       });
+    }
 
     setUser({
       name: "",
